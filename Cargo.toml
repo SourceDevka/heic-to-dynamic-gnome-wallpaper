@@ -15,15 +15,15 @@ license = "GPL-3.0-only"
 
 [dependencies]
 anyhow = "1.0.39"
-base64 = "0.13.0"
+base64 = "0.21.4"
 chrono = "0.4.19"
-clap = "3.1"
+clap = "4.4.2"
 colored = "2.0.0"
-indicatif = "0.16"
-libheif-rs = "0.15"
+indicatif = "0.17.6"
+libheif-rs = "0.22.0"
 plist = "1.1.0"
 png = "0.17"
-quick-xml = { version = "0.22.0", features = ["serialize"] }
+quick-xml = { version = "0.30.0", features = ["serialize"] }
 serde = { version = "1.0.124", features = ["derive"] }
 
 [package.metadata.rpm]

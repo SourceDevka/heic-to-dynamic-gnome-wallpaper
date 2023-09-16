@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'heic-to-dynamic-gnome-wallpaper'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=heic-to-dynamic-gnome-wallpaper",
+                    "--package=heic-to-dynamic-gnome-wallpaper"
+                ],
+                "filter": {
+                    "name": "heic-to-dynamic-gnome-wallpaper",
+                    "kind": "bin"
+                }
+            },
+            "args": ["/home/veynko/Pictures/wallpapers/dynamic/Red Anime Wallpapers.heic"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'heic-to-dynamic-gnome-wallpaper'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=heic-to-dynamic-gnome-wallpaper",
+                    "--package=heic-to-dynamic-gnome-wallpaper"
+                ],
+                "filter": {
+                    "name": "heic-to-dynamic-gnome-wallpaper",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

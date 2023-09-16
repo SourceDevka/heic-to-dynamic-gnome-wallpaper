@@ -13,7 +13,7 @@ use libheif_rs::HeifContext;
 use std::io::BufWriter;
 
 pub struct ImagePoint<'a> {
-    pub image_ctx: &'a HeifContext,
+    pub image_ctx: &'a HeifContext<'a>,
     pub img_id: u32,
     pub index: usize,
     pub background: &'a mut Background,

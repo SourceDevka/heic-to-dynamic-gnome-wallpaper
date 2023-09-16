@@ -76,7 +76,7 @@ pub fn compute_solar_based_wallpaper(
     println!("{}:", "Conversion".green());
     let pb = ProgressBar::new(image_ctx.number_of_top_level_images() as u64).with_style(
         ProgressStyle::default_bar()
-            .template("[{wide_bar}] {pos}/{len} [ETA: {eta_precise}]")
+            .template("[{wide_bar}] {pos}/{len} [ETA: {eta_precise}]").unwrap()
             .progress_chars("## "),
     );
     for (idx, SolarToHourSlice { time, index }) in time_slices.iter().enumerate().progress_with(pb)

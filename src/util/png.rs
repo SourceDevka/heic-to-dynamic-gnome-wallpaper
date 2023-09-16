@@ -17,13 +17,16 @@ use colored::*;
 use std::io::{BufWriter, Write};
 
 use anyhow::Result;
-use libheif_rs::{ColorSpace, ImageHandle, RgbChroma};
+use libheif_rs::{ColorSpace, ImageHandle, RgbChroma, LibHeif};
 
 pub fn write_png(path: &str, handle: ImageHandle) -> Result<()> {
+    let libheif = LibHeif::new();
     let width = handle.width();
     let height = handle.height();
     //let decoded = handle.decode(ColorSpace::YCbCr(libheif_rs::Chroma::C444), false).unwrap();
-    let res = handle.decode(ColorSpace::Rgb(RgbChroma::C444), false);
+    //let res = handle.decode(ColorSpace::Rgb(RgbChroma::C444), false);
+    let res = libheif.decode(&handle, ColorSpace::Rgb(RgbChroma::C444), None);
+
     if let Ok(decoded) = res {
         let planes = decoded.planes();
 

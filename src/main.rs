@@ -36,7 +36,7 @@ fn main() -> Result<()> {
     let matches = Command::new("heic-to-dynamic-gnome-wallpaper")
         .arg(Arg::new(INPUT)
              .help("Image which should be transformed")
-             .takes_value(true)
+             .num_args(1)
              .value_name(INPUT)
              .required(true)
         )
@@ -45,16 +45,16 @@ fn main() -> Result<()> {
              .long_help("Specifies into which directory created images should be written to. Default is the parent directory of the given image.")
              .short('d')
              .long("dir")
-             .takes_value(true)
+             .num_args(1)
              .value_name(DIR)
         )
         .get_matches();
     let path = matches
-        .value_of(INPUT)
+        .get_one::<String>(INPUT)
         .ok_or_else(|| anyhow::Error::msg("Could not read INPUT"))?;
 
-    let parent_directory = if matches.is_present(DIR) {
-        let nu_path = std::path::Path::new(matches.value_of(DIR).unwrap()).to_path_buf();
+    let parent_directory = if matches.contains_id(DIR) {
+        let nu_path = std::path::Path::new(matches.get_one::<String>(DIR).unwrap()).to_path_buf();
         if !nu_path.exists() {
             std::fs::create_dir_all(&nu_path)?
         }

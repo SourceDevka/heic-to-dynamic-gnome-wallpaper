@@ -70,7 +70,7 @@ pub fn compute_time_based_wallpaper(
     println!("{}:", "Conversion".green());
     let pb = ProgressBar::new(number_of_images as u64).with_style(
         ProgressStyle::default_bar()
-            .template("[{wide_bar}] {pos}/{len} [ETA: {eta_precise}]")
+            .template("[{wide_bar}] {pos}/{len} [ETA: {eta_precise}]").unwrap()
             .progress_chars("## "),
     );
     for (time_idx, TimeSlice { time, idx }) in

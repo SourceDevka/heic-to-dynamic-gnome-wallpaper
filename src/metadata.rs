@@ -16,6 +16,7 @@
 use anyhow::Result;
 use libheif_rs::HeifContext;
 use quick_xml::{events::Event, Reader};
+use base64::{Engine as _, engine::general_purpose};
 
 use crate::schema::plist::{WallpaperMetaSun, WallpaperMetaTime};
 
@@ -30,7 +31,7 @@ pub fn get_wallpaper_metadata(image_ctx: &HeifContext) -> Option<WallPaperMode> 
     image_ctx
         .primary_image_handle()
         .unwrap()
-        .metadata_block_ids("mime", &mut metadatas);
+        .metadata_block_ids( &mut metadatas, b"mime");
     let metadata_id = metadatas
         .get(0)
         .expect("Could not get metadata information");
@@ -45,25 +46,25 @@ pub fn get_wallpaper_metadata(image_ctx: &HeifContext) -> Option<WallPaperMode> 
         let mut reader = Reader::from_str(&content);
         reader.trim_text(true);
 
-        let mut buf = Vec::new();
+        // let mut buf = Vec::new();
         let mut h24 = None;
 
         loop {
-            match reader.read_event(&mut buf) {
+            match reader.read_event() {
                 Ok(quick_xml::events::Event::Empty(ref e)) => {
                     e.attributes()
                         .filter(|att| {
-                            att.as_ref().unwrap().key == "apple_desktop:h24".as_bytes()
-                                || att.as_ref().unwrap().key == "apple_desktop:solar".as_bytes()
+                            att.as_ref().unwrap().key.0 == "apple_desktop:h24".as_bytes()
+                                || att.as_ref().unwrap().key.0 == "apple_desktop:solar".as_bytes()
                         })
                         .for_each(|att| match att.as_ref().unwrap().key {
-                            s if s == "apple_desktop:h24".as_bytes() => {
+                            s if s.0 == "apple_desktop:h24".as_bytes() => {
                                 h24 = Some(WallPaperMode::H24(
                                     String::from_utf8_lossy(&att.unwrap().value)
                                         .to_string(),
                                 ))
                             }
-                            s if s == "apple_desktop:solar".as_bytes() => {
+                            s if s.0 == "apple_desktop:solar".as_bytes() => {
                                 h24 = Some(WallPaperMode::Solar(
                                     String::from_utf8_lossy(&att.unwrap().value)
                                         .to_string(),
@@ -84,13 +85,13 @@ pub fn get_wallpaper_metadata(image_ctx: &HeifContext) -> Option<WallPaperMode> 
 }
 
 pub fn get_time_plist_from_base64(input: &str) -> Result<WallpaperMetaTime> {
-    let decoded = base64::decode(input)?;
+    let decoded = general_purpose::STANDARD.decode(input)?;
     let plist = plist::from_bytes(&decoded)?;
     Ok(plist)
 }
 
 pub fn get_solar_plist_from_base64(input: &str) -> Result<WallpaperMetaSun> {
-    let decoded = base64::decode(input)?;
+    let decoded = general_purpose::STANDARD.decode(input)?;
     let plist = plist::from_bytes(&decoded)?;
     Ok(plist)
 }

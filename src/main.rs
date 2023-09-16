@@ -1,18 +1,3 @@
-// heic-to-dynamic-gnome-wallpaper
-// Copyright (C) 2022 Johannes Wünsche
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
 use anyhow::Result;
 use colored::*;
 use libheif_rs::HeifContext;
@@ -31,7 +16,10 @@ mod util;
 const INPUT: &str = "IMAGE";
 const DIR: &str = "DIR";
 const NAME: &str = "NAME";
+const VERS: &str = "VERS";
+
 const DAY_SECS: f32 = 86400.0;
+const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
 
 fn main() -> Result<()> {
     let matches = Command::new("heic-to-dynamic-gnome-wallpaper")
@@ -39,7 +27,7 @@ fn main() -> Result<()> {
              .help("Image which should be transformed")
              .num_args(1)
              .value_name(INPUT)
-             .required(true)
+            //  .required(true)
         )
         .arg(Arg::new(NAME)
             .help("Wallpaper name")
@@ -56,8 +44,21 @@ fn main() -> Result<()> {
              .long("dir")
              .num_args(1)
              .value_name(DIR)
+            )
+        .arg(Arg::new(VERS)
+            .help("Print version")
+            .short('v')
+            .long("version")
+            .value_name("VERSION")
+            .num_args(0)
         )
         .get_matches();
+    
+    if matches.contains_id(VERS) {
+        println!("Version: {}", VERSION.unwrap_or("unknown"));
+        std::process::exit(0);
+    }
+
     let path = matches
         .get_one::<String>(INPUT)
         .ok_or_else(|| anyhow::Error::msg("Could not read INPUT"))?;

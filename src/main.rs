@@ -30,6 +30,7 @@ mod util;
 
 const INPUT: &str = "IMAGE";
 const DIR: &str = "DIR";
+const NAME: &str = "NAME";
 const DAY_SECS: f32 = 86400.0;
 
 fn main() -> Result<()> {
@@ -39,6 +40,14 @@ fn main() -> Result<()> {
              .num_args(1)
              .value_name(INPUT)
              .required(true)
+        )
+        .arg(Arg::new(NAME)
+            .help("Wallpaper name")
+            .long_help("Wallpaper name. If not specified, the file name is used by default")
+            .short('n')
+            .long("name")
+            .num_args(1)
+            .value_name(NAME)
         )
         .arg(Arg::new(DIR)
              .help("Into which directory the output images and schema should be written to.")
@@ -53,14 +62,22 @@ fn main() -> Result<()> {
         .get_one::<String>(INPUT)
         .ok_or_else(|| anyhow::Error::msg("Could not read INPUT"))?;
 
+    let name = if matches.contains_id(NAME) {
+        matches.get_one::<String>(NAME).unwrap().trim()
+    }
+    else {
+        let path = Path::new(path);
+        path.file_stem().unwrap().to_str().unwrap()
+    };
+
     let parent_directory = if matches.contains_id(DIR) {
-        let nu_path = std::path::Path::new(matches.get_one::<String>(DIR).unwrap()).to_path_buf();
+        let nu_path = std::path::Path::new(matches.get_one::<String>(DIR).unwrap().trim()).to_path_buf();
         if !nu_path.exists() {
             std::fs::create_dir_all(&nu_path)?
         }
         nu_path.canonicalize()?
     } else {
-        std::path::Path::new(path)
+        let mut path = std::path::Path::new(path)
             .canonicalize()
             .map_err(|e| {
                 anyhow::Error::msg(format!("Cannot get absolute path of the given file: {}", e))
@@ -72,8 +89,14 @@ fn main() -> Result<()> {
                     "Cannot get parent of given image path: \"{}\"",
                     path
                 ))
-            })?
-            .to_path_buf()
+            })?.to_path_buf();
+        path.push(name);
+
+        if !path.exists() {
+            std::fs::create_dir_all(&path)?
+        }
+
+        path
     };
     let image_ctx = HeifContext::read_from_file(path)?;
 
@@ -88,10 +111,10 @@ fn main() -> Result<()> {
         return Err(anyhow::Error::msg("No valid metadata found describing wallpaper! Please check if the mime field is available and carries an apple_desktop:h24 and/or apple_desktop:solar value"));
     }
 
-    let image_name = Path::new(path)
-        .file_stem()
-        .expect("Could not get file name of path")
-        .to_string_lossy();
+    // let image_name = Path::new(path)
+    //     .file_stem()
+    //     .expect("Could not get file name of path")
+    //     .to_string_lossy();
 
     println!(
         "{}: Detecting wallpaper description type...",
@@ -107,7 +130,7 @@ fn main() -> Result<()> {
                 image_ctx,
                 content,
                 &parent_directory,
-                &image_name,
+                &name,
             )
         }
         metadata::WallPaperMode::Solar(content) => {
@@ -115,7 +138,12 @@ fn main() -> Result<()> {
                 "{}: Detected solar-based wallpaper.",
                 "Preparation".bright_blue(),
             );
-            solar::compute_solar_based_wallpaper(image_ctx, content, &parent_directory, &image_name)
+            solar::compute_solar_based_wallpaper(
+                image_ctx, 
+                content, 
+                &parent_directory, 
+                &name
+            )
         }
     }
 }
